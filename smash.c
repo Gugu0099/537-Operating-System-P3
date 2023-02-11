@@ -75,13 +75,7 @@ int read_args_helper(char *args[], FILE *fp)
     lexer(line, &found, &len);
     // printf("%d\n", len);
     // printf("%s\n", *found);
-    // while(len){
-    //     if(*found[len - 1] == '\n'){
-    //         *found[len - 1] = 0;
-    //     }
-    //     len--;
-    // }
-    
+
     if (strcmp(found[0], "exit") == 0)
     {
         // check exit and if there is an argument after exit
@@ -114,13 +108,20 @@ int read_args_helper(char *args[], FILE *fp)
         }
     }
 
-    /*
-    if(strcmp(args[0], "pwd") == 0){
-        char *buf = (char*)malloc(100 * sizeof(char));
-
-        int ptr = getcwd()
+    // printf("%d\n", strcmp(found[0], "pwd"));
+    if (strcmp(found[0], "pwd") == 0)
+    {
+        char buf[1024];
+        if (getcwd(buf, sizeof(buf)) == NULL)
+        {
+            printf("Error: pwd is NULL\n");
+            return -1;
+        }
+        printf("%s\n", buf);
     }
-    */
+
+    // if(strcmp(found[0], "loop") == 0){
+    // }
     free(line);
     return 0;
 }

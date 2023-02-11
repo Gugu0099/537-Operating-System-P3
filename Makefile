@@ -1,2 +1,2 @@
 run:
-	gcc smash.c -o smash -Werror -Wall -g
+	gcc smash.c -o smash -Werror -g
