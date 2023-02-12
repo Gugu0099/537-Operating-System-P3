@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/wait.h>
+#include <ctype.h>
 
 /// description: Takes a line and splits it into args similar to how argc
 ///              and argv work in main
@@ -48,9 +49,10 @@ int forkredirct(char **args, int num_args)
     if (rc == 0)
     {
         int erec_rc = execv(args[0], args);
-        
+        printf("Fork error has occured\n");
     }
-      else{
+    else
+    {
         int status;
         int wait_rc = waitpid(rc, &status, 0);
     }
@@ -59,7 +61,8 @@ int forkredirct(char **args, int num_args)
 
 int read_args_helper(char *args[], FILE *fp)
 {
-    // use getline() to read in arguments from fp
+    // int contains_loop = 0;
+    //  use getline() to read in arguments from fp
     char *line = malloc(100 * sizeof(char));
     size_t buf_size;
     int read_args;
@@ -86,62 +89,107 @@ int read_args_helper(char *args[], FILE *fp)
     // printf("%d\n", len);
     // printf("%s\n", *found);
 
+    /*
+    for(int i = 0; i < len; i++){
+        printf("idx %d: %s\n", i, found[i]);
+    }
+    */
+
     if (strcmp(found[0], "exit") == 0)
     {
-        // check exit and if there is an argument after exit
+        // printf("Error\n");
+        //  check exit and if there is an argument after exit
         if (found[1] != NULL)
         {
             printf("ERROR: Args after exit\n");
             return -1;
         }
-        exit(0);
+        else
+        {
+            exit(0);
+        }
     }
-        if (strcmp(found[0], "cd") == 0)
+    if (strcmp(found[0], "cd") == 0)
+    {
+        if (found[1] == NULL || found[2] != NULL)
         {
-            if (found[1] == NULL || found[2] != NULL)
-            {
-                printf("ERROR: Invalid cd args\n");
-                return -1;
-            }
-            // try changing directories
-            // chdir() return 0 if it can change, something else otherwise
-            int ret = chdir(found[1]);
-            if (ret == 0)
-            {
-                return 1;
-            }
-            else
-            {
-                printf("Error: Could not change directories\n");
-                return -1;
-            }
+            printf("ERROR: Invalid cd args\n");
+            return -1;
         }
-
-        // printf("%d\n", strcmp(found[0], "pwd"));
-        if (strcmp(found[0], "pwd") == 0)
+        // try changing directories
+        // chdir() return 0 if it can change, something else otherwise
+        int ret = chdir(found[1]);
+        if (ret != 0)
         {
-            char buf[1024];
-            if (getcwd(buf, sizeof(buf)) == NULL)
-            {
-                printf("Error: pwd is NULL\nSpecifically, w");
-                return -1;
-            }
-            printf("%s\n", buf);
+            printf("Error: Could not change directories\n");
+            return -1;
         }
-
-        // if(strcmp(found[0], "loop") == 0){
-        //     int repeat = atoi(found[1]); // number of times you repeat
-        //     // copy string
-        //     char *newCommand;
-        //     for(int i = 0; i < )
-        // }
-
-        forkredirct(found, len);
-
-        free(line);
-        return 0;
+        else
+        {
+            return 1;
+        }
     }
 
+    // printf("%d\n", strcmp(found[0], "pwd"));
+    if (strcmp(found[0], "pwd") == 0)
+    {
+        char buf[1024];
+        if (getcwd(buf, sizeof(buf)) == NULL)
+        {
+            printf("Error: pwd is NULL\nSpecifically, w");
+            return -1;
+        }
+        printf("%s\n", buf);
+    }
+
+    if (strcmp(args[0], "loop") == 0)
+    {
+        int loopNum;
+        if (isdigit(*found[1]))
+        { // why dereference it ???
+            loopNum = atoi(found[1]);
+        }
+        else
+        {
+            printf("Error: arguments after loop is not int\n");
+            return -1;
+        }
+        char **for_args;
+        for_args = malloc(sizeof(char *) * 50); 
+
+        // create array of strings for the for loop arguments
+        for (int i = 0; i < 50; i++)
+        {
+            for_args[i] = malloc(sizeof(char) * 256);
+        }
+        int x = 0;
+        // copy for loop arguments 
+        while(1){
+            if (found[x+2] == NULL || strcmp(found[x+2], ";")){ // TODO: maybe change to ';'
+                break;
+            }
+            for_args[x] = strdup(found[x+2]);
+            x++;
+
+        }
+        // execute for loop args repeatedly
+        for (int i = 0; i < loopNum; i++)
+        {
+            continue;
+        }
+        // freeing the for loop arguments
+        for (int i = 0; i < 50; i++)
+        {
+            free(for_args[i]);
+        }
+        free(for_args);
+    }
+
+    // forkredirct(found, len);
+
+    free(line);
+    return 0;
+}
 
 int main(int argc, char *argv[])
 {
@@ -150,14 +198,13 @@ int main(int argc, char *argv[])
 
     if (argc > 1)
     {
+        printf("Too many number of args in smash\n");
         exit(1);
     }
-
 
     while (1)
     {
         printf("smash> ");
-        
 
         arguments = malloc(sizeof(char *) * 50); // max size of arguments???
 
@@ -170,9 +217,9 @@ int main(int argc, char *argv[])
 
         if (canProcess == 1)
         {
-            return 1;
+            continue;
         }
-
+        // TODO: Maybe canProcess returns -1 and we exit?
         // clearing up array of strings
         for (int i = 0; i < 50; i++)
         {
