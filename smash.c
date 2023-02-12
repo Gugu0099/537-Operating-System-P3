@@ -24,23 +24,35 @@ int lexer(char *line, char ***args, int *num_args)
     char *token = strtok(l, " \t\n");
     while (token != NULL)
     {
-        (*num_args)++;
-        token = strtok(NULL, " \t\n");
-    }
-    free(l);
-    // split line into args
-    *args = malloc(sizeof(char **) * *num_args);
-    *num_args = 0;
-    token = strtok(line, " \t\n");
-    while (token != NULL)
-    {
-        char *token_copy = strdup(token);
-        if (token_copy == NULL)
+        *args = malloc(sizeof(char **) * *num_args);
+        *num_args = 0;
+        token = strtok(line, " \t\n");
+        while (token != NULL)
         {
-            return -1;
+            char *token_copy = strdup(token);
+            if (token_copy == NULL)
+            {
+                return -1;
+            }
+            (*args)[(*num_args)++] = token_copy;
+            token = strtok(NULL, " \t\n");
         }
-        (*args)[(*num_args)++] = token_copy;
-        token = strtok(NULL, " \t\n");
+    }
+    return 0;
+}
+
+int forkredirct(char **args, int num_args)
+{
+    int rc = fork();
+
+    if (rc == 0)
+    {
+        int erec_rc = execv(args[0], args);
+        
+    }
+      else{
+        int status;
+        int wait_rc = waitpid(rc, &status, 0);
     }
     return 0;
 }
@@ -67,8 +79,6 @@ int read_args_helper(char *args[], FILE *fp)
     {
         return 1;
     }
-
-    // parsing the command line
     char **found;
     int len = 0;
     len = strlen(line);
@@ -86,45 +96,52 @@ int read_args_helper(char *args[], FILE *fp)
         }
         exit(0);
     }
+        if (strcmp(found[0], "cd") == 0)
+        {
+            if (found[1] == NULL || found[2] != NULL)
+            {
+                printf("ERROR: Invalid cd args\n");
+                return -1;
+            }
+            // try changing directories
+            // chdir() return 0 if it can change, something else otherwise
+            int ret = chdir(found[1]);
+            if (ret == 0)
+            {
+                return 1;
+            }
+            else
+            {
+                printf("Error: Could not change directories\n");
+                return -1;
+            }
+        }
 
-    if (strcmp(found[0], "cd") == 0)
-    {
-        if (found[1] == NULL || found[2] != NULL)
+        // printf("%d\n", strcmp(found[0], "pwd"));
+        if (strcmp(found[0], "pwd") == 0)
         {
-            printf("ERROR: Invalid cd args\n");
-            return -1;
+            char buf[1024];
+            if (getcwd(buf, sizeof(buf)) == NULL)
+            {
+                printf("Error: pwd is NULL\nSpecifically, w");
+                return -1;
+            }
+            printf("%s\n", buf);
         }
-        // try changing directories
-        // chdir() return 0 if it can change, something else otherwise
-        int ret = chdir(found[1]);
-        if (ret == 0)
-        {
-            return 1;
-        }
-        else
-        {
-            printf("Error: Could not change directories\n");
-            return -1;
-        }
+
+        // if(strcmp(found[0], "loop") == 0){
+        //     int repeat = atoi(found[1]); // number of times you repeat
+        //     // copy string
+        //     char *newCommand;
+        //     for(int i = 0; i < )
+        // }
+
+        forkredirct(found, len);
+
+        free(line);
+        return 0;
     }
 
-    // printf("%d\n", strcmp(found[0], "pwd"));
-    if (strcmp(found[0], "pwd") == 0)
-    {
-        char buf[1024];
-        if (getcwd(buf, sizeof(buf)) == NULL)
-        {
-            printf("Error: pwd is NULL\n");
-            return -1;
-        }
-        printf("%s\n", buf);
-    }
-
-    // if(strcmp(found[0], "loop") == 0){
-    // }
-    free(line);
-    return 0;
-}
 
 int main(int argc, char *argv[])
 {
@@ -136,9 +153,11 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
+
     while (1)
     {
         printf("smash> ");
+        
 
         arguments = malloc(sizeof(char *) * 50); // max size of arguments???
 
@@ -161,6 +180,5 @@ int main(int argc, char *argv[])
         }
         free(arguments);
     }
-
     return 0;
 }
