@@ -59,7 +59,80 @@ int forkredirct(char **args, int num_args)
     return 0;
 }
 
-int read_args_helper(char *args[], FILE *fp)
+int process_cmds(char **args, int num_args)
+{
+    int i = 0;
+    while (i < num_args)
+    {
+        if (strcmp(args[i], "exit") == 0)
+        {
+            // printf("Error\n");
+            //  check exit and if there is an argument after exit
+            if (args[i + 1] != NULL)
+            {
+                printf("ERROR: Args after exit\n");
+                return -1;
+            }
+            else
+            {
+                exit(0);
+            }
+        }
+        if (strcmp(args[i], "cd") == 0)
+        {
+            if (args[i + 1] == NULL || args[i + 2] != NULL)
+            {
+                printf("ERROR: Invalid cd args\n");
+                return -1;
+            }
+            // try changing directories
+            // chdir() return 0 if it can change, something else otherwise
+            int ret = chdir(args[i + 1]);
+            if (ret != 0)
+            {
+                printf("Error: Could not change directories\n");
+                return -1;
+            }
+            else
+            {
+                return 1;
+            }
+        }
+
+        // printf("%d\n", strcmp(found[0], "pwd"));
+        if (strcmp(args[i], "pwd") == 0)
+        {
+            char buf[1024];
+            if (getcwd(buf, sizeof(buf)) == NULL)
+            {
+                printf("Error: pwd is NULL\n");
+                return -1;
+            }
+            printf("%s\n", buf);
+        }
+
+        if (strcmp(args[i], "loop") == 0)
+        {
+            int loopNum;
+            if (isdigit(*args[i + 1]))
+            { // why dereference it ???
+                loopNum = atoi(args[i + 1]);
+            }
+            else
+            {
+                printf("Error: arguments after loop is not int\n");
+                return -1;
+            }
+            for(int i = 0; i < loopNum; i++){
+                process_cmds(&args[i + 2], num_args - i - 2);
+            }
+        }
+        i++;
+    }
+    return 0;
+}
+
+int read_args_helper(FILE *fp)
 {
     // int contains_loop = 0;
     //  use getline() to read in arguments from fp
@@ -86,15 +159,19 @@ int read_args_helper(char *args[], FILE *fp)
     int len = 0;
     len = strlen(line);
     lexer(line, &found, &len);
+    int rc = process_cmds(found, len);
     // printf("%d\n", len);
     // printf("%s\n", *found);
-
+    for (int i = 0; i < len; i++)
+    {
+        printf("%s\n", found[i]);
+    }
     /*
     for(int i = 0; i < len; i++){
         printf("idx %d: %s\n", i, found[i]);
     }
     */
-
+    /*
     if (strcmp(found[0], "exit") == 0)
     {
         // printf("Error\n");
@@ -155,7 +232,7 @@ int read_args_helper(char *args[], FILE *fp)
             return -1;
         }
         char **for_args;
-        for_args = malloc(sizeof(char *) * 50); 
+        for_args = malloc(sizeof(char *) * 50);
 
         // create array of strings for the for loop arguments
         for (int i = 0; i < 50; i++)
@@ -163,7 +240,7 @@ int read_args_helper(char *args[], FILE *fp)
             for_args[i] = malloc(sizeof(char) * 256);
         }
         int x = 0;
-        // copy for loop arguments 
+        // copy for loop arguments
         while(1){
             if (found[x+2] == NULL || strcmp(found[x+2], ";")){ // TODO: maybe change to ';'
                 break;
@@ -186,15 +263,13 @@ int read_args_helper(char *args[], FILE *fp)
     }
 
     // forkredirct(found, len);
-
+    */
     free(line);
     return 0;
 }
 
 int main(int argc, char *argv[])
 {
-
-    char **arguments;
 
     if (argc > 1)
     {
@@ -206,26 +281,12 @@ int main(int argc, char *argv[])
     {
         printf("smash> ");
 
-        arguments = malloc(sizeof(char *) * 50); // max size of arguments???
-
-        // create array of strings
-        for (int i = 0; i < 50; i++)
-        {
-            arguments[i] = malloc(sizeof(char) * 256);
-        }
-        int canProcess = read_args_helper(arguments, stdin);
+        int canProcess = read_args_helper(stdin);
 
         if (canProcess == 1)
         {
             continue;
         }
-        // TODO: Maybe canProcess returns -1 and we exit?
-        // clearing up array of strings
-        for (int i = 0; i < 50; i++)
-        {
-            free(arguments[i]);
-        }
-        free(arguments);
     }
     return 0;
 }
