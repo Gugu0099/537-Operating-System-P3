@@ -68,7 +68,7 @@ int process_cmds(char **args, int num_args)
         {
             // printf("Error\n");
             //  check exit and if there is an argument after exit
-            if (args[i + 1] != NULL)
+            if (i + 1 < num_args && args[i + 1] != NULL)
             {
                 printf("ERROR: Args after exit\n");
                 return -1;
@@ -117,6 +117,7 @@ int process_cmds(char **args, int num_args)
             if (isdigit(*args[i + 1]))
             { // why dereference it ???
                 loopNum = atoi(args[i + 1]);
+                
                 if (loopNum == 0){
                     printf("Error: cannot execute loop 0 times"); // todo skip over args??
                     process_cmds(&args[i + 3], num_args - i - 3);
