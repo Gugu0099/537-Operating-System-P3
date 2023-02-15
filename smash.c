@@ -80,7 +80,7 @@ int process_cmds(char **args, int num_args)
         }
         if (strcmp(args[i], "cd") == 0)
         {
-            if (args[i + 1] == NULL || args[i + 2] != NULL)
+            if ((i + 1 < num_args && args[i + 1] == NULL) ||( i + 2 < num_args && args[i + 2] != NULL))
             {
                 printf("ERROR: Invalid cd args\n");
                 return -1;
@@ -117,14 +117,22 @@ int process_cmds(char **args, int num_args)
             if (isdigit(*args[i + 1]))
             { // why dereference it ???
                 loopNum = atoi(args[i + 1]);
+                if (loopNum == 0){
+                    printf("Error: cannot execute loop 0 times"); // todo skip over args??
+                    process_cmds(&args[i + 3], num_args - i - 3);
+                }
             }
             else
             {
                 printf("Error: arguments after loop is not int\n");
                 return -1;
             }
-            for(int i = 0; i < loopNum; i++){
-                process_cmds(&args[i + 2], num_args - i - 2);
+            // execute command loopNum times
+            for(int j = 0; j < loopNum - 1; j++){
+                //printf("A1: %s\n", args[i + 2]);
+                if (process_cmds(&args[i + 2], num_args - i - 2) == -1){
+                    printf("ERROR: Couldn't execute loop command\n");
+                }
             }
         }
         i++;
@@ -162,10 +170,12 @@ int read_args_helper(FILE *fp)
     int rc = process_cmds(found, len);
     // printf("%d\n", len);
     // printf("%s\n", *found);
+    /*
     for (int i = 0; i < len; i++)
     {
         printf("%s\n", found[i]);
     }
+    */
     /*
     for(int i = 0; i < len; i++){
         printf("idx %d: %s\n", i, found[i]);
