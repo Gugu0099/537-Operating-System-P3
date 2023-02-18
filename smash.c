@@ -89,8 +89,11 @@ int process_cmds(char **args, int num_args)
             // try changing directories
             // chdir() return 0 if it can change, something else otherwise
             int ret = chdir(args[i + 1]);
+            //printf("args[i+1]: %s\n", args[i+1]);
+
             if (ret != 0)
             {
+                printf("Error no: %d\n", ret);
                 printf("Error: Could not change directories\n");
                 return -1;
             }
@@ -124,7 +127,8 @@ int process_cmds(char **args, int num_args)
                 
                 if (loopNum == 0){
                     printf("Error: cannot execute loop 0 times"); // todo skip over args??
-                    process_cmds(&args[i + 3], num_args - i - 3);
+                    //process_cmds(&args[i + 3], num_args - i - 3);
+                    return 1;
                 }
             }
             else
@@ -133,7 +137,10 @@ int process_cmds(char **args, int num_args)
                 return -1;
             }
             // execute command loopNum times
-            for(int j = 0; j < loopNum; j++){
+            if(loopNum == 1){
+                process_cmds(&args[i + 2], num_args - i - 2);
+            } else {
+            for(int j = 0; j < loopNum-1; j++){
                 //printf("A1: %s\n", args[i + 2]);
                 if (process_cmds(&args[i + 2], num_args - i - 2) == -1){
                     printf("ERROR: Couldn't execute loop command\n");
@@ -141,6 +148,7 @@ int process_cmds(char **args, int num_args)
             }
             i+=2; // skip over args and go to top of loop again
             continue;
+        }
         }
         i++;
     }
