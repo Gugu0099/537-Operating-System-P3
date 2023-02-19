@@ -20,7 +20,7 @@ Test badcd
 cd to a bad directory
 
 **********************************************************************
-/tmp/tmpxpby6hvi/p/./smash
+/tmp/tmpa21rbknn/p/./smash
 
 
 test badcd PASSED (5 of 5)
@@ -34,7 +34,7 @@ Test exec
 path should be /bin
 
 **********************************************************************
-/tmp/tmpxpby6hvi/p/./smash
+/tmp/tmpa21rbknn/p/./smash
 
 
 test exec PASSED (5 of 5)
@@ -48,7 +48,7 @@ Test badexec
 run programs that do not exist in /bin
 
 **********************************************************************
-/tmp/tmpxpby6hvi/p/./smash
+/tmp/tmpa21rbknn/p/./smash
 
 
 test badexec PASSED (5 of 5)
@@ -62,7 +62,7 @@ Test pwd
 pwd test
 
 **********************************************************************
-/tmp/tmpxpby6hvi/p/./smash
+/tmp/tmpa21rbknn/p/./smash
 
 
 test pwd PASSED (5 of 5)
@@ -76,7 +76,7 @@ Test whitespace
 leading and trailing whitespace, full whitespaces or empty string
 
 **********************************************************************
-/tmp/tmpxpby6hvi/p/./smash
+/tmp/tmpa21rbknn/p/./smash
 
 
 test whitespace PASSED (5 of 5)
@@ -90,7 +90,7 @@ Test rdr
 simple redirection with no standard error
 
 **********************************************************************
-/tmp/tmpxpby6hvi/p/./smash
+/tmp/tmpa21rbknn/p/./smash
 
 
 test rdr PASSED (10 of 10)
@@ -104,7 +104,7 @@ Test pipe
 simple pipe
 
 **********************************************************************
-/tmp/tmpxpby6hvi/p/./smash
+/tmp/tmpa21rbknn/p/./smash
 
 
 test pipe PASSED (15 of 15)
@@ -118,7 +118,7 @@ Test mul
 running multiple commands at once
 
 **********************************************************************
-/tmp/tmpxpby6hvi/p/./smash
+/tmp/tmpa21rbknn/p/./smash
 
 
 test mul PASSED (5 of 5)
@@ -132,21 +132,11 @@ Test loop
 simple loop
 
 **********************************************************************
-/tmp/tmpxpby6hvi/p/./smash
-testing.test.Failure: ./smash gave incorrect standard output.
-Expected: "smash> hello\nhello\nsmash>"
-Got:      "smash> hello\nsmash>"
+/tmp/tmpa21rbknn/p/./smash
 
 
-test loop FAILED (0 of 15)
+test loop PASSED (15 of 15)
  (simple loop)
- ./smash gave incorrect standard output.
-
- Test it yourself by running
- smash </home/cs537-1/tests/P3/loop/in
- and check out the test folder
- /home/cs537-1/tests/P3/loop
- to compare your output with reference outputs. 
 
 starting looprd
 
@@ -156,10 +146,10 @@ Test looprd
 simple redirection with loop
 
 **********************************************************************
-/tmp/tmpxpby6hvi/p/./smash
+/tmp/tmpa21rbknn/p/./smash
 testing.test.Failure: ./smash gave incorrect standard error.
 Expected: ""
-Got:      "An error has occurred\nAn error has occurred\nAn error has occurred"
+Got:      "An error has occurred\nAn error has occurred"
 
 
 test looprd FAILED (0 of 15)
@@ -180,10 +170,10 @@ Test piperd
 redirection with pipe
 
 **********************************************************************
-/tmp/tmpxpby6hvi/p/./smash
+/tmp/tmpa21rbknn/p/./smash
 testing.test.Failure: ./smash gave incorrect standard error.
 Expected: ""
-Got:      "/bin/grep: >: No such file or directory\n/bin/grep: >: No such file or directory\n/bin/grep: >: No such file or directory\n/bin/grep: >: No such file or directory\n/bin/grep: >: No such file or directory\n/bin/grep: >: No such file or directory\n/bin/grep: >: No such file or directory\n/bin/grep: >: No such file or directory\n/bin/grep: >: No such file or directory"
+Got:      "/bin/grep: >: No such file or directory"
 
 
 test piperd FAILED (0 of 15)
@@ -204,7 +194,7 @@ Test pipechain
 chain pipe
 
 **********************************************************************
-/tmp/tmpxpby6hvi/p/./smash
+/tmp/tmpa21rbknn/p/./smash
 testing.test.Failure: ./smash gave incorrect standard output.
 Expected: "smash> smash> smash> smash>"
 Got:      "smash> hello world > test1\nsmash> smash> smash>"
@@ -249,15 +239,8 @@ test pipe PASSED (15 of 15)
 test mul PASSED (5 of 5)
  (running multiple commands at once)
 
-test loop FAILED (0 of 15)
+test loop PASSED (15 of 15)
  (simple loop)
- ./smash gave incorrect standard output.
-
- Test it yourself by running
- smash </home/cs537-1/tests/P3/loop/in
- and check out the test folder
- /home/cs537-1/tests/P3/loop
- to compare your output with reference outputs. 
 
 test looprd FAILED (0 of 15)
  (simple redirection with loop)
@@ -289,6 +272,6 @@ test pipechain FAILED (0 of 15)
  /home/cs537-1/tests/P3/pipechain
  to compare your output with reference outputs. 
 
-Passed 9 of 13 tests.
-Overall 9 of 13
-Points 60 of 120
+Passed 10 of 13 tests.
+Overall 10 of 13
+Points 75 of 120
