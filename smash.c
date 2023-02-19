@@ -5,9 +5,12 @@
 #include <sys/wait.h>
 #include <ctype.h>
 
-int errorHandler()
+int errorHandler(int i)
 {
-    char error_message[30] = "An error has occurred\n";
+    char error_message[30] = "An error has occurred  \n";
+    error_message[strlen(error_message)-3] = i%10 + '0';
+    error_message[strlen(error_message)-4] = i/10 + '0';
+    printf("\n%d\n\n\n", i);
     write(STDERR_FILENO, error_message, strlen(error_message));
 }
 
@@ -83,7 +86,8 @@ int forkredirct(char **args, int num_args, FILE *fp)
             }
             */
             int erec_rc = execv(args2[0], args2);
-            errorHandler();
+            errorHandler(1);
+            _exit(1);
             // fprintf(fp, "An error has occurred\n");
             // printf("return code: %d\n", rc);
             // printf("Fork error has occured\n");
@@ -115,8 +119,12 @@ int forkredirct(char **args, int num_args, FILE *fp)
                 printf("args[%d]: %s\n", i, args[i]);
             }
             */
+            
+            for(int i=0; i < num_args; i++) {
+                printf("%s ", args[i]);
+            }
             int erec_rc = execv(args[0], args);
-            errorHandler();
+            errorHandler(2);
             _exit(1); // _exit with execv, otherwise funcky behavior;
             // printf("return code: %d\n", rc);
             // printf("Fork error has occured\n");
@@ -172,7 +180,7 @@ void pipes(char *args1[], char *args2[])
         // execute child process 1
         execv(args1[0], args1);
         perror(args1[0]);
-        exit(1);
+        _exit(1);
     }
     else
     {
@@ -194,7 +202,7 @@ void pipes(char *args1[], char *args2[])
         // execute child process 2
         execv(args2[0], args2);
         perror(args2[0]);
-        exit(1);
+        _exit(1);
     }
     else
     {
@@ -207,10 +215,15 @@ void pipes(char *args1[], char *args2[])
 
 int process_cmds(char **args, int num_args)
 {
+    printf("process_cmd called:\n");
+    for(int j=0; j< num_args; j++){
+        printf("%s ", args[j]);
+    }
+    printf("\n");
     int i = 0;
     char *output;
     //  iterate the command;
-    int flag = 0;
+    int flag = 0; // high if redirection sign is present
     int pipeFlag = 0;
     int pipeNum = -1;
     for (int x = 0; x < num_args; x++)
@@ -241,7 +254,7 @@ int process_cmds(char **args, int num_args)
                 //  check exit and if there is an argument after exit
                 if (i + 1 < num_args && args[i + 1] != NULL)
                 {
-                    errorHandler();
+                    errorHandler(3);
                     // fprintf(fp, "ERROR: Args after exit\n");
                     return -1;
                 }
@@ -255,7 +268,7 @@ int process_cmds(char **args, int num_args)
                 // printf("n_args: %d, i: %d\n", num_args, i);
                 if ((i + 1 < num_args && args[i + 1] == NULL) || (i + 2 < num_args && strcmp(args[i + 2], ";")))
                 {
-                    errorHandler();
+                    errorHandler(4);
                     // fprintf(fp, "A: %s %d\n", args[i + 2], strcmp(args[i + 2], ";"));
                     // fprintf(fp, "ERROR: Invalid cd args\n");
                     return -1;
@@ -267,7 +280,7 @@ int process_cmds(char **args, int num_args)
 
                 if (ret != 0)
                 {
-                    errorHandler();
+                    errorHandler(5);
                     // fprintf(fp, "Error no: %d\n", ret);
                     // fprintf(fp, "Error: Could not change directories\n");
                     return -1;
@@ -284,7 +297,7 @@ int process_cmds(char **args, int num_args)
                 char buf[1024];
                 if (getcwd(buf, sizeof(buf)) == NULL)
                 {
-                    errorHandler();
+                    errorHandler(6);
                     // fprintf(fp, "Error: pwd is NULL\n");
                     return -1;
                 }
@@ -296,7 +309,7 @@ int process_cmds(char **args, int num_args)
                 int loopNum;
                 if (i + 1 >= num_args)
                 {
-                    errorHandler();
+                    errorHandler(7);
                     // fprintf(fp, "Error: not enough args for the loop function");
                 }
                 if (isdigit(*args[i + 1])) // strlen(str) == strlen( itoa(atoi(str)) <- for numbers greater than 9
@@ -305,15 +318,15 @@ int process_cmds(char **args, int num_args)
 
                     if (loopNum == 0)
                     {
-                        errorHandler();
-                        // fprintf(fp, "Error: cannot execute loop 0 times"); // todo skip over args??
+                        errorHandler(8);
+                        // fprintf(fp, "Error: i,cannot execute loop 0 times"); // todo skip over args??
                         //  process_cmds(&args[i + 3], num_args - i - 3);
                         return 1;
                     }
                 }
                 else
                 {
-                    errorHandler();
+                    errorHandler(8);
                     // fprintf(fp, "Error: arguments after loop is not int\n");
                     return -1;
                 }
@@ -329,13 +342,14 @@ int process_cmds(char **args, int num_args)
                         // printf("A1: %s\n", args[i + 2]);
                         if (process_cmds(&args[i + 2], num_args - i - 2) == -1)
                         {
-                            errorHandler();
+                            errorHandler(9);
                             // fprintf(fp, "ERROR: Couldn't execute loop command\n");
                         }
                     }
                     i += 2; // skip over args and go to top of loop again
                     continue;
                 }
+                break;
             }
             else if (pipeFlag == 1)
             {
@@ -379,7 +393,6 @@ int process_cmds(char **args, int num_args)
             }
             else
             {
-
                 return forkredirct(args, num_args, fp);
             }
             i++;
@@ -388,15 +401,15 @@ int process_cmds(char **args, int num_args)
     }
     else
     {
-        while (i < num_args)
-        {
+         while (i < num_args)
+         {
             if (strcmp(args[i], "exit") == 0)
             {
                 // printf("Error\n");
                 //  check exit and if there is an argument after exit
                 if (i + 1 < num_args && args[i + 1] != NULL)
                 {
-                    errorHandler();
+                    errorHandler(10);
                     // printf("ERROR: Args after exit\n");
                     return -1;
                 }
@@ -410,7 +423,7 @@ int process_cmds(char **args, int num_args)
                 // printf("n_args: %d, i: %d\n", num_args, i);
                 if ((i + 1 < num_args && args[i + 1] == NULL) || (i + 2 < num_args && strcmp(args[i + 2], ";")))
                 {
-                    errorHandler();
+                    errorHandler(11);
                     // printf("A: %s %d\n", args[i + 2], strcmp(args[i + 2], ";"));
                     // printf("ERROR: Invalid cd args\n");
                     return -1;
@@ -422,7 +435,7 @@ int process_cmds(char **args, int num_args)
 
                 if (ret != 0)
                 {
-                    errorHandler();
+                    errorHandler(12);
                     // printf("Error no: %d\n", ret);
                     // printf("Error: Could not change directories\n");
                     return -1;
@@ -439,7 +452,7 @@ int process_cmds(char **args, int num_args)
                 char buf[1024];
                 if (getcwd(buf, sizeof(buf)) == NULL)
                 {
-                    errorHandler();
+                    errorHandler(13);
                     // printf("Error: pwd is NULL\n");
                     return -1;
                 }
@@ -451,7 +464,7 @@ int process_cmds(char **args, int num_args)
                 int loopNum;
                 if (i + 1 >= num_args)
                 {
-                    errorHandler();
+                    errorHandler(14);
                     // printf("Error: not enough args for the loop function");
                 }
                 if (isdigit(*args[i + 1])) // strlen(str) == strlen( itoa(atoi(str)) <- for numbers greater than 9
@@ -460,7 +473,7 @@ int process_cmds(char **args, int num_args)
 
                     if (loopNum == 0)
                     {
-                        errorHandler();
+                        errorHandler(15);
                         // printf("Error: cannot execute loop 0 times"); // todo skip over args??
                         //  process_cmds(&args[i + 3], num_args - i - 3);
                         return 1;
@@ -468,7 +481,7 @@ int process_cmds(char **args, int num_args)
                 }
                 else
                 {
-                    errorHandler();
+                    errorHandler(16);
                     // printf("Error: arguments after loop is not int\n");
                     return -1;
                 }
@@ -484,14 +497,15 @@ int process_cmds(char **args, int num_args)
                         // printf("A1: %s\n", args[i + 2]);
                         if (process_cmds(&args[i + 2], num_args - i - 2) == -1)
                         {
-                            errorHandler();
+                            errorHandler(17);
                             // printf("ERROR: Couldn't execute loop command\n");
                         }
                     }
                     i += 2; // skip over args and go to top of loop again
                     continue;
                 }
-            }
+                break;
+             }
             else if (pipeFlag == 1)
             {
                 // fprintf(stderr,"start of pipe2");
@@ -536,10 +550,11 @@ int process_cmds(char **args, int num_args)
                 free(output_array2);
                 //fprintf(stderr,"end of pipe2");
             }
-        else
-        {
-            return forkredirct(args, num_args, NULL);
-        }
+            else
+            {
+                printf("here\n");
+                return forkredirct(args, num_args, NULL);
+            }
         i++;
     }
 }
@@ -651,7 +666,7 @@ int main(int argc, char *argv[])
 
     if (argc > 1)
     {
-        errorHandler();
+        errorHandler(20);
         // printf("Too many number of args in smash\n");
         exit(1);
     }
