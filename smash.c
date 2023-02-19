@@ -54,17 +54,18 @@ int lexer(char *line, char ***args, int *num_args)
 
 int forkredirct(char **args, int num_args, FILE *fp)
 {
+    args[num_args] = NULL;
     int rc = fork();
     if (fp)
     {
         // redo args
-        char **args2 = malloc(sizeof(char *) * (num_args - 2));
-        for (int i = 0; i < num_args - 2; i++)
+        char **args2 = malloc(sizeof(char *) * (num_args - 1));
+        for (int i = 0; i < num_args - 1; i++)
         {
             args2[i] = malloc(100);
         }
         // copy over old args into new args
-        for (int i = 0; i < num_args - 2; i++)
+        for (int i = 0; i < num_args - 1; i++)
         {
             strcpy(args2[i], args[i]);
         }
@@ -92,7 +93,7 @@ int forkredirct(char **args, int num_args, FILE *fp)
             int wait_rc = waitpid(rc, &status, 0);
             int exitStatus = WEXITSTATUS(status);
             // free new args
-            for (int i = 0; i < num_args - 2; i++)
+            for (int i = 0; i < num_args - 1; i++)
             {
                 free(args2[i]);
             }
@@ -124,6 +125,7 @@ int forkredirct(char **args, int num_args, FILE *fp)
             */
             int erec_rc = execv(args[0], args);
             errorHandler();
+            exit(1);
             // printf("return code: %d\n", rc);
             // printf("Fork error has occured\n");
         }
@@ -266,7 +268,7 @@ int process_cmds(char **args, int num_args)
             else
             {
 
-                forkredirct(args, num_args, fp);
+                return forkredirct(args, num_args, fp);
             }
             i++;
         }
@@ -380,7 +382,7 @@ int process_cmds(char **args, int num_args)
             }
             else
             {
-                forkredirct(args, num_args, NULL);
+                return forkredirct(args, num_args, NULL);
             }
             i++;
         }
