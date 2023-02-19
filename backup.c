@@ -54,7 +54,6 @@ int lexer(char *line, char ***args, int *num_args)
 
 int forkredirct(char **args, int num_args, FILE *fp)
 {
-   // fprintf(stderr,"start of redirection\n");
     args[num_args] = NULL;
     int rc = fork();
     if (fp)
@@ -99,7 +98,6 @@ int forkredirct(char **args, int num_args, FILE *fp)
                 free(args2[i]);
             }
             free(args2);
-          //  fprintf(stderr,"end of redirection\n");
             return exitStatus;
         }
     }
@@ -132,79 +130,27 @@ int forkredirct(char **args, int num_args, FILE *fp)
     return 0;
 }
 
-void pipes(char *args1[], char *args2[])
+int pipes(char **args1, char **args2)
 {
-    // Compute number of arguments in args1
-    int num_args1 = 0;
-    while (args1[num_args1] != NULL)
-    {
-        num_args1++;
-    }
-
-    // Compute number of arguments in args2
-    int num_args2 = 0;
-    while (args2[num_args2] != NULL)
-    {
-        num_args2++;
-    }
-
-    // Rest of the function remains the same
     int pipefd[2];
-    if (pipe(pipefd) == -1)
-    {
-        printf("error");
-        exit(1);
-    }
+    pipe(pipefd);
+    int pid = fork();
 
-    int pid1 = fork();
-    if (pid1 < 0)
+    if (pid == 0)
     {
-        exit(1);
-    }
-    if (pid1 == 0)
-    {
-        // parent gets here and handles "cat scores"
-        // replace standard output with output part of pipe
-        dup2(pipefd[1], 1);
-        // close unused input half of pipe
-        close(pipefd[0]);
-
-        // execute child process 1
-        execv(args1[0], args1);
-        perror(args1[0]);
-        exit(1);
-    }
-    else
-    {
-        int status;
-        waitpid(pid1, &status, 0);
-    }
-
-    int pid2 = fork();
-    if (pid2 < 0)
-    {
-        exit(1);
-    }
-    if (pid2 == 0)
-    {
-        // replace standard input with input part of pipe
         dup2(pipefd[0], 0);
         close(pipefd[1]);
-
-        // execute child process 2
         execv(args2[0], args2);
-        perror(args2[0]);
-        exit(1);
     }
     else
     {
+        dup2(pipefd[1], 1);
         close(pipefd[0]);
-        close(pipefd[1]);
-        int status;
-        waitpid(pid2, &status, 0);
+        execv(args1[0], args1);
+        perror(args1[0]);
     }
+    return 0;
 }
-
 int process_cmds(char **args, int num_args)
 {
     int i = 0;
@@ -339,43 +285,49 @@ int process_cmds(char **args, int num_args)
             }
             else if (pipeFlag == 1)
             {
-                //fprintf(stderr,"start of pipe1");
-                int i;
-                int delimiter_found = 0;
-                int input_size = num_args;
-                char *delimiter = "|";
-                char **output_array1 = malloc(sizeof(char *) * input_size);
-                char **output_array2 = malloc(sizeof(char *) * input_size);
 
-                for (i = 0; i < input_size; i++)
+                char **firstCommand = malloc(sizeof(char *) * (pipeNum));
+                char **secondCommand = malloc(sizeof(char *) * (num_args - 1));
+            
+                for (int k = 0; k < pipeNum; k++)
                 {
-                    if (strcmp(args[i], delimiter) == 0)
-                    {
-                        delimiter_found = 1;
-                        break;
-                    }
-                    output_array1[i] = args[i];
+                    firstCommand[k] = malloc(100);
                 }
-                output_array1[i] = NULL;
+                for (int k = 0; k < pipeNum; k++)
+                {
+                    strcpy(firstCommand[k], args[k]);
+                }
+                for (int k = 0; k < pipeNum; k++)
+                {
+                    printf("Printing pip1 cmds: %s\n", firstCommand[k]);
+                }
 
-                if (delimiter_found)
+                for (int k = pipeNum + 1; k < num_args; k++)
                 {
-                    int j;
-                    for (j = 0, i = i + 1; i < input_size; i++, j++)
-                    {
-                        output_array2[j] = args[i];
-                    }
-                    output_array2[j] = NULL;
+                    secondCommand[k] = malloc(100);
                 }
-                else
+                for (int k = pipeNum; k < num_args; k++)
                 {
-                    output_array2[0] = NULL;
+                    strcpy(secondCommand[k], args[k]);
                 }
-                pipes(output_array1,output_array2);
-                // Free memory allocated for the output arrays
-                free(output_array1);
-                free(output_array2);
-                //fprintf(stderr,"end of pipe1");
+
+                for (int k = pipeNum+1; k < num_args; k++)
+                {
+                    printf("Printing pip2 cmds: %s\n", secondCommand[k]);
+                }
+
+                pipes(firstCommand, secondCommand);
+
+                for (int k = 0; i < pipeNum; k++)
+                {
+                    free(firstCommand[k]);
+                }
+                free(firstCommand);
+                for (int k = pipeNum; k < num_args; k++)
+                {
+                    free(secondCommand[k]);
+                }
+                free(secondCommand);
             }
             else
             {
@@ -491,59 +443,70 @@ int process_cmds(char **args, int num_args)
                     i += 2; // skip over args and go to top of loop again
                     continue;
                 }
-            }
-            else if (pipeFlag == 1)
+            }  else if (pipeFlag == 1)
             {
-                // fprintf(stderr,"start of pipe2");
-                int i;
-                int delimiter_found = 0;
-                int input_size = num_args;
-                char *delimiter = "|";
-                char **output_array1 = malloc(sizeof(char *) * input_size);
-                char **output_array2 = malloc(sizeof(char *) * input_size);
+                
+                fprintf(stderr,"start here \n");
 
-                for (i = 0; i < input_size; i++)
+                char **firstCommand = malloc(sizeof(char *) * (pipeNum + 1));
+                char **secondCommand = malloc(sizeof(char *) * (num_args - pipeNum));
+            
+                for (int k = 0; k < pipeNum + 1; k++)
                 {
-                    if (strcmp(args[i], delimiter) == 0)
-                    {
-                        delimiter_found = 1;
-                        break;
-                    }
-                    output_array1[i] = args[i];
+                    firstCommand[k] = malloc(100);
                 }
-                output_array1[i] = NULL;
-
-                if (delimiter_found)
+                for (int k = 0; k < pipeNum; k++)
                 {
-                    int j;
-                    for (j = 0, i = i + 1; i < input_size; i++, j++)
-                    {
-                        output_array2[j] = args[i];
-                    }
-                    output_array2[j] = NULL;
+                    strcpy(firstCommand[k], args[k]);
+                    fprintf(stderr,"firstCmd:%s\n",firstCommand[k]);
                 }
-                else
+                firstCommand[pipeNum] = NULL;
+                /*
+                for (int k = 0; k < pipeNum; k++)
                 {
-                    output_array2[0] = NULL;
+                    printf("Printing pip1 cmds: %s\n", firstCommand[k]);
                 }
-                //fprintf(stderr,"bruh");
+                */
+                for (int k = 0; k < num_args - pipeNum; k++)
+                {
+                    secondCommand[k] = malloc(100);
+                }
+                for (int k = 0; k < num_args - pipeNum - 1; k++)
+                {
+                    strcpy(secondCommand[k], args[k + pipeNum + 1]);
+                    fprintf(stderr,"secondCmd:%s\n",secondCommand[k]);
 
-                pipes(output_array1,output_array2);
-                //fprintf(stderr,"bruh 2");
+                }
+                secondCommand[num_args - pipeNum] = NULL;
 
-                // Free memory allocated for the output arrays
-                free(output_array1);
-                free(output_array2);
-                //fprintf(stderr,"end of pipe2");
+                /*
+                for (int k = pipeNum+1; k < num_args; k++)
+                {
+                    printf("Printing pip2 cmds: %s\n", secondCommand[k]);
+                }
+                */
+              //  pipes(firstCommand, secondCommand);
+
+                for (int k = 0; k < pipeNum + 1; k++)
+                {
+                    free(firstCommand[k]);
+                }
+                free(firstCommand);
+                for (int k = 0; k < num_args - pipeNum; k++)
+                {
+                    free(secondCommand[k]);
+                }
+                free(secondCommand);
             }
-        else
-        {
-            return forkredirct(args, num_args, NULL);
+            else
+            {
+                return forkredirct(args, num_args, NULL);
+            }
+            i++;
         }
-        i++;
     }
-}
-return 0;
+
+    return 0;
 }
 // if check the exev call; exev only return if it fails;
 int read_args_helper(FILE *fp)
