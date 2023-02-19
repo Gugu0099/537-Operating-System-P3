@@ -65,7 +65,7 @@ int forkredirct(char **args, int num_args, FILE *fp)
             args2[i] = malloc(100);
         }
         // copy over old args into new args
-        for (int i = 0; i < num_args - 1; i++)
+        for (int i = 0; i < num_args - 2; i++)
         {
             strcpy(args2[i], args[i]);
         }
@@ -125,7 +125,7 @@ int forkredirct(char **args, int num_args, FILE *fp)
             */
             int erec_rc = execv(args[0], args);
             errorHandler();
-            exit(1);
+            _exit(1); // _exit with execv, otherwise funcky behavior;
             // printf("return code: %d\n", rc);
             // printf("Fork error has occured\n");
         }
@@ -279,7 +279,7 @@ int process_cmds(char **args, int num_args)
         while (i < num_args)
         {
             if (strcmp(args[i], "exit") == 0)
-            {
+            { 
                 // printf("Error\n");
                 //  check exit and if there is an argument after exit
                 if (i + 1 < num_args && args[i + 1] != NULL)
@@ -503,8 +503,9 @@ int main(int argc, char *argv[])
 
     while (1)
     {
-        printf("smash> ");
-
+        // printf("smash> ");
+        fprintf(stdout, "smash> ");
+        fflush(stdout);
         int canProcess = read_args_helper(stdin);
 
         if (canProcess == 1)
