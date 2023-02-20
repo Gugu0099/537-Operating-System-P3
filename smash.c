@@ -153,8 +153,20 @@ int forkredirct(char **args, int num_args, FILE *fp)
     return 0;
 }
 
-void pipes(char *args1[], char *args2[])
+int pipes(char *args1[], char *args2[], FILE *fp)
 {
+    /*
+    char **output_array3 = malloc(sizeof(char *) * input_size - 1);
+    for(int i = 0; i < input_size - 2; i++){
+        output_array3[i] = malloc(100);
+        strcpy(output_array3[i],output_array2[i]);
+    }
+    output_array3[input_size - 2] = NULL;
+    pipes(output_array1,output_array2);
+    free(output_array1);
+    free(output_array3);    
+    */
+    int hasRedir = 0;
     // Compute number of arguments in args1
     int num_args1 = 0;
     while (args1[num_args1] != NULL)
@@ -165,65 +177,135 @@ void pipes(char *args1[], char *args2[])
     // Compute number of arguments in args2
     int num_args2 = 0;
     while (args2[num_args2] != NULL)
-    {
+    {   
+        if (strcmp(args2[num_args2], ">")== 0){
+            hasRedir = 1;
+        }
         num_args2++;
     }
 
-    // Rest of the function remains the same
-    int pipefd[2];
-    if (pipe(pipefd) == -1)
-    {
-        printf("error");
-        exit(1);
-    }
+    if (hasRedir == 0){
+        // Rest of the function remains the same
+        int pipefd[2];
+        if (pipe(pipefd) == -1)
+        {
+            printf("error");
+            exit(1);
+        }
 
-    int pid1 = fork();
-    if (pid1 < 0)
-    {
-        exit(1);
-    }
-    if (pid1 == 0)
-    {
-        // parent gets here and handles "cat scores"
-        // replace standard output with output part of pipe
-        dup2(pipefd[1], 1);
-        // close unused input half of pipe
-        close(pipefd[0]);
+        int pid1 = fork();
+        if (pid1 < 0)
+        {
+            exit(1);
+        }
+        if (pid1 == 0)
+        {
+            // parent gets here and handles "cat scores"
+            // replace standard output with output part of pipe
+            dup2(pipefd[1], 1);
+            // close unused input half of pipe
+            close(pipefd[0]);
 
-        // execute child process 1
-        execv(args1[0], args1);
-        perror(args1[0]);
-        _exit(1);
-    }
-    else
-    {
-        int status;
-        waitpid(pid1, &status, 0);
-    }
+            // execute child process 1
+            execv(args1[0], args1);
+            perror(args1[0]);
+            _exit(1);
+        }
+        else
+        {
+            int status;
+            waitpid(pid1, &status, 0);
+        }
 
-    int pid2 = fork();
-    if (pid2 < 0)
-    {
-        exit(1);
-    }
-    if (pid2 == 0)
-    {
-        // replace standard input with input part of pipe
-        dup2(pipefd[0], 0);
-        close(pipefd[1]);
+        int pid2 = fork();
+        if (pid2 < 0)
+        {
+            exit(1);
+        }
+        if (pid2 == 0)
+        {
+            // replace standard input with input part of pipe
+            dup2(pipefd[0], 0);
+            close(pipefd[1]);
 
-        // execute child process 2
-        execv(args2[0], args2);
-        perror(args2[0]);
-        _exit(1);
+            // execute child process 2
+            execv(args2[0], args2);
+            perror(args2[0]);
+            _exit(1);
+        }
+        else
+        {
+            close(pipefd[0]);
+            close(pipefd[1]);
+            int status;
+            waitpid(pid2, &status, 0);
+        }       
+    } else {
+        // need to shorten args2
+        char **args3 = malloc(sizeof(char *) * (num_args2 - 1));
+        for(int i = 0; i < num_args2 - 2; i++){
+            args3[i] = strdup(args2[i]);
+            // printf("args2[%d]: %s\n", i, args2[i]);
+            // printf("args3[%d]: %s\n", i, args3[i]);
+        }
+        args3[num_args2 - 2] = NULL;
+        // Rest of the function remains the same
+        int pipefd[2];
+        if (pipe(pipefd) == -1)
+        {
+            printf("error");
+            exit(1);
+        }
+
+        int pid1 = fork();
+        if (pid1 < 0)
+        {
+            exit(1);
+        }
+        if (pid1 == 0)
+        {
+            // parent gets here and handles "cat scores"
+            // replace standard output with output part of pipe
+            dup2(pipefd[1], 1); // 1 
+            // close unused input half of pipe
+            close(pipefd[0]);
+
+            // execute child process 1
+            execv(args1[0], args1);
+            perror(args1[0]);
+            _exit(1);
+        }
+        else
+        {
+            int status;
+            waitpid(pid1, &status, 0);
+        }
+
+        int pid2 = fork();
+        if (pid2 < 0)
+        {
+            exit(1);
+        }
+        if (pid2 == 0)
+        {
+            // replace standard input with input part of pipe
+            dup2(pipefd[0], 0);
+            close(pipefd[1]);
+
+            // execute child process 2
+            execv(args3[0], args3);
+            perror(args3[0]);
+            _exit(1);
+        }
+        else
+        {
+            close(pipefd[0]);
+            close(pipefd[1]);
+            int status;
+            waitpid(pid2, &status, 0);
+        }
     }
-    else
-    {
-        close(pipefd[0]);
-        close(pipefd[1]);
-        int status;
-        waitpid(pid2, &status, 0);
-    }
+    return 0;
 }
 
 int process_cmds(char **args, int num_args)
@@ -398,11 +480,21 @@ int process_cmds(char **args, int num_args)
                 {
                     output_array2[0] = NULL;
                 }
-                pipes(output_array1,output_array2);
+                /*
+                for(int i = 0; i < input_size; i++){
+                    printf("pip1: %s\n", output_array1[i]);
+                }
+
+                for(int i = 0; i < input_size; i++){
+                    printf("pip2: %s\n", output_array2[i]);
+                }
+                */
+                pipes(output_array1,output_array2, fp);
                 // Free memory allocated for the output arrays
                 free(output_array1);
                 free(output_array2);
                 //fprintf(stderr,"end of pipe1");
+                
             }
             else
             {
@@ -555,7 +647,7 @@ int process_cmds(char **args, int num_args)
                 }
                 //fprintf(stderr,"bruh");
 
-                pipes(output_array1,output_array2);
+                pipes(output_array1,output_array2, NULL);
                 //fprintf(stderr,"bruh 2");
 
                 // Free memory allocated for the output arrays
