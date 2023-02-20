@@ -1,4 +1,8 @@
-loop 2 /bin/echo hello > output
+loop 2 /bin/echo hello > output.txt
 
 
-/bin/echo hello > output
+/bin/echo hello > output.txt
+0          1    2  3
+
+/bin/echo hello NULL
+0           1    2

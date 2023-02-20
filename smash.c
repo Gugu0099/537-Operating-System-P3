@@ -63,6 +63,7 @@ int forkredirct(char **args, int num_args, FILE *fp)
     if (fp)
     {
         // redo args
+       // printf("num_args: %d\n", num_args);
         char **args2 = malloc(sizeof(char *) * (num_args - 1));
         for (int i = 0; i < num_args - 1; i++)
         {
@@ -74,13 +75,19 @@ int forkredirct(char **args, int num_args, FILE *fp)
             strcpy(args2[i], args[i]);
         }
         args2[num_args - 2] = NULL;
-
+        /*
+        for (int i = 0; i < num_args - 1; i++)
+            {
+                printf("args[%d]: %s\n", i, args2[i]);
+            }
+*/
         if (rc == 0)
         {
             int oldfile = fileno(fp);
             dup2(oldfile, STDOUT_FILENO);
+            
+            // printf("args[0]: %s\n", args[0]);
             /*
-            printf("args[0]: %s\n", args[0]);
             for (int i = 0; i < num_args; i++)
             {
                 printf("args[%d]: %s\n", i, args[i]);
@@ -99,11 +106,18 @@ int forkredirct(char **args, int num_args, FILE *fp)
             int wait_rc = waitpid(rc, &status, 0);
             int exitStatus = WEXITSTATUS(status);
             // free new args
-            for (int i = 0; i < num_args - 1; i++)
+            /*
+            for (int i = 0; i < num_args - 2; i++)
             {
+                if (args2[i] != NULL){
+                printf("aaaaaaa: %s     %d\n",args2[i], i);
                 free(args2[i]);
+                }
             }
-            free(args2);
+            if (args2){
+                free(args2);
+            }
+            */
           //  fprintf(stderr,"end of redirection\n");
             return exitStatus;
         }
