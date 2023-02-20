@@ -1,0 +1,17 @@
+[33mc9f2786[m[33m ([m[1;36mHEAD -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m change while for stdout
+[33m0a18c15[m changing while next step
+[33me75ede1[m test 9/13
+[33mf71536d[m test 8/13
+[33m05ac289[m echo working
+[33mb82237f[m test 3/13
+[33mda5ab09[m fixed for loop for now
+[33mf8b436f[m ; working
+[33m98b5ef4[m multiple commands working
+[33mfdc4bb6[m loop 1 exit fix
+[33m8e26fe3[m loop kind of working further testing needed
+[33m5d06297[m loop working
+[33m40399c4[m todo: change helper
+[33m719ba13[m fork() working
+[33m7b40147[m pwd working
+[33m2f27d2c[m exit, cd working
+[33mfcca6f1[m initial commit

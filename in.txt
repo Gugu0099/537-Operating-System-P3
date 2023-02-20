@@ -1,0 +1,4 @@
+loop 2 /bin/echo hello > output
+
+
+/bin/echo hello > output

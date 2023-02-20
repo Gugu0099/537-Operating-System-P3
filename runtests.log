@@ -20,7 +20,7 @@ Test badcd
 cd to a bad directory
 
 **********************************************************************
-/tmp/tmpa21rbknn/p/./smash
+/tmp/tmppuld3tff/p/./smash
 
 
 test badcd PASSED (5 of 5)
@@ -34,7 +34,7 @@ Test exec
 path should be /bin
 
 **********************************************************************
-/tmp/tmpa21rbknn/p/./smash
+/tmp/tmppuld3tff/p/./smash
 
 
 test exec PASSED (5 of 5)
@@ -48,7 +48,7 @@ Test badexec
 run programs that do not exist in /bin
 
 **********************************************************************
-/tmp/tmpa21rbknn/p/./smash
+/tmp/tmppuld3tff/p/./smash
 
 
 test badexec PASSED (5 of 5)
@@ -62,7 +62,7 @@ Test pwd
 pwd test
 
 **********************************************************************
-/tmp/tmpa21rbknn/p/./smash
+/tmp/tmppuld3tff/p/./smash
 
 
 test pwd PASSED (5 of 5)
@@ -76,7 +76,7 @@ Test whitespace
 leading and trailing whitespace, full whitespaces or empty string
 
 **********************************************************************
-/tmp/tmpa21rbknn/p/./smash
+/tmp/tmppuld3tff/p/./smash
 
 
 test whitespace PASSED (5 of 5)
@@ -90,7 +90,7 @@ Test rdr
 simple redirection with no standard error
 
 **********************************************************************
-/tmp/tmpa21rbknn/p/./smash
+/tmp/tmppuld3tff/p/./smash
 
 
 test rdr PASSED (10 of 10)
@@ -104,7 +104,7 @@ Test pipe
 simple pipe
 
 **********************************************************************
-/tmp/tmpa21rbknn/p/./smash
+/tmp/tmppuld3tff/p/./smash
 
 
 test pipe PASSED (15 of 15)
@@ -118,7 +118,7 @@ Test mul
 running multiple commands at once
 
 **********************************************************************
-/tmp/tmpa21rbknn/p/./smash
+/tmp/tmppuld3tff/p/./smash
 
 
 test mul PASSED (5 of 5)
@@ -132,7 +132,7 @@ Test loop
 simple loop
 
 **********************************************************************
-/tmp/tmpa21rbknn/p/./smash
+/tmp/tmppuld3tff/p/./smash
 
 
 test loop PASSED (15 of 15)
@@ -146,21 +146,11 @@ Test looprd
 simple redirection with loop
 
 **********************************************************************
-/tmp/tmpa21rbknn/p/./smash
-testing.test.Failure: ./smash gave incorrect standard error.
-Expected: ""
-Got:      "An error has occurred\nAn error has occurred"
+/tmp/tmppuld3tff/p/./smash
 
 
-test looprd FAILED (0 of 15)
+test looprd PASSED (15 of 15)
  (simple redirection with loop)
- ./smash gave incorrect standard error.
-
- Test it yourself by running
- smash </home/cs537-1/tests/P3/looprd/in
- and check out the test folder
- /home/cs537-1/tests/P3/looprd
- to compare your output with reference outputs. 
 
 starting piperd
 
@@ -170,7 +160,7 @@ Test piperd
 redirection with pipe
 
 **********************************************************************
-/tmp/tmpa21rbknn/p/./smash
+/tmp/tmppuld3tff/p/./smash
 testing.test.Failure: ./smash gave incorrect standard error.
 Expected: ""
 Got:      "/bin/grep: >: No such file or directory"
@@ -194,7 +184,7 @@ Test pipechain
 chain pipe
 
 **********************************************************************
-/tmp/tmpa21rbknn/p/./smash
+/tmp/tmppuld3tff/p/./smash
 testing.test.Failure: ./smash gave incorrect standard output.
 Expected: "smash> smash> smash> smash>"
 Got:      "smash> hello world > test1\nsmash> smash> smash>"
@@ -242,15 +232,8 @@ test mul PASSED (5 of 5)
 test loop PASSED (15 of 15)
  (simple loop)
 
-test looprd FAILED (0 of 15)
+test looprd PASSED (15 of 15)
  (simple redirection with loop)
- ./smash gave incorrect standard error.
-
- Test it yourself by running
- smash </home/cs537-1/tests/P3/looprd/in
- and check out the test folder
- /home/cs537-1/tests/P3/looprd
- to compare your output with reference outputs. 
 
 test piperd FAILED (0 of 15)
  (redirection with pipe)
@@ -272,6 +255,6 @@ test pipechain FAILED (0 of 15)
  /home/cs537-1/tests/P3/pipechain
  to compare your output with reference outputs. 
 
-Passed 10 of 13 tests.
-Overall 10 of 13
-Points 75 of 120
+Passed 11 of 13 tests.
+Overall 11 of 13
+Points 90 of 120

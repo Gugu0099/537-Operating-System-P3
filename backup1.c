@@ -8,9 +8,9 @@
 int errorHandler(int i)
 {
     char error_message[30] = "An error has occurred\n";
-    // error_message[strlen(error_message)-3] = i%10 + '0';
-    // error_message[strlen(error_message)-4] = i/10 + '0';
-    // printf("\n%d\n\n\n", i);
+    error_message[strlen(error_message)-3] = i%10 + '0';
+    error_message[strlen(error_message)-4] = i/10 + '0';
+    printf("\n%d\n\n\n", i);
     write(STDERR_FILENO, error_message, strlen(error_message));
 }
 
@@ -73,7 +73,6 @@ int forkredirct(char **args, int num_args, FILE *fp)
         {
             strcpy(args2[i], args[i]);
         }
-        args2[num_args - 2] = NULL;
 
         if (rc == 0)
         {
